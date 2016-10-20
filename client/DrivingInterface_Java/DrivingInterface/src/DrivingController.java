@@ -35,12 +35,39 @@ public class DrivingController {
 		////////////////////// END input parameters
 		
 		// To-Do : Make your driving algorithm
+		//필요 변수
+		double current_speed=speed*3.6; //시속으로 속도 변환
+		double target_speed=0; // 목표 속도
+		double C=0.541052; //핸들 꺽는 강도 조절 계수
+		double safeDistance=( (current_speed >150) ? current_speed-150 : 5 ); //코너를 만났을 때 감속 하기 시작할 안전거리 계산
+		double centering=0; //유지할 차선 좌표 중심값
 		
+		//// 코너링 시 감속 안전거리 이내일 때 속도 조절  ////
+		if(track_dist_straight>safeDistance){
+			target_speed=200;
+		}else{
+			target_speed=100;
+		}
 
+		//// Speed Control ////
+		if(current_speed<target_speed){
+			cmd.brake=0;
+			cmd.accel=(target_speed-current_speed)/target_speed;
+		}else if(current_speed>target_speed){
+			cmd.accel=0;
+			cmd.brake=(current_speed-target_speed)/current_speed;
+		}else{
+			cmd.accel=0;
+			cmd.brake=0;
+		}
+		
+		//centering 기준좌표로 차선 중심 잡고 이동하도록 steer 조절
+		cmd.steer=C*(angle+(centering-toMiddle)/track_width);
+		
 		////////////////////// output values		
-		cmd.steer = 0.0;
-		cmd.accel = 0.2;
-		cmd.brake = 0.0;
+		//cmd.steer = 0.0;
+		//cmd.accel = 0.2;
+		//cmd.brake = 0.0;
 		cmd.backward = DrivingInterface.gear_type_forward;
 		////////////////////// END output values
 		
